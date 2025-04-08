@@ -1,0 +1,237 @@
+@startuml Dino Game UML Diagram
+
+' Package declarations
+package "user_interface" {
+    class GameWindow {
+        +static final int SCREEN_WIDTH
+        +static final int SCREEN_HEIGHT
+        -GameScreen gameScreen
+        +GameWindow()
+        -startGame()
+        +main(String[] args)
+    }
+
+    class GameScreen {
+        -Thread thread
+        -static final int STARTING_SPEED_X
+        -static final double DIFFICULTY_INC
+        +static final double GRAVITY
+        +static final int GROUND_Y
+        +static final double SPEED_Y
+        -double speedX
+        -GameState gameState
+        -Controls controls
+        -Score score
+        -Dino dino
+        -Land land
+        -Clouds clouds
+        -EnemyManager eManager
+        +GameScreen()
+        +startThread()
+        +run()
+        -updateFrame()
+        +paintComponent(Graphics g)
+    }
+}
+
+package "game_object" {
+    class Dino {
+        -static final int[] HITBOX_RUN
+        -static final int[] HITBOX_DOWN_RUN
+        +static final double X
+        -Controls controls
+        -double y
+        -double speedY
+        -DinoState dinoState
+        -BufferedImage dinoJump
+        -BufferedImage dinoDead
+        -Animation dinoRun
+        -Animation dinoDownRun
+        +Dino(Controls controls)
+        +getHitbox()
+        +updatePosition()
+        +jump()
+        +draw(Graphics g)
+    }
+
+    class Cactuses {
+        -List<BufferedImage> cactuses
+        -List<Integer> cactusesX
+        -List<Integer> cactusesY
+        -GameScreen gameScreen
+        -EnemyManager eManager
+        +Cactuses(GameScreen gameScreen, EnemyManager eManager)
+        +updatePosition()
+        +createCactuses()
+        +isCollision(Rectangle hitBox)
+        +draw(Graphics g)
+    }
+
+    class Birds {
+        -List<BufferedImage> birds
+        -List<Integer> birdsX
+        -List<Integer> birdsY
+        -GameScreen gameScreen
+        -EnemyManager eManager
+        +Birds(GameScreen gameScreen, EnemyManager eManager)
+        +updatePosition()
+        +createBird()
+        +isCollision(Rectangle hitBox)
+        +draw(Graphics g)
+    }
+
+    class Land {
+        -BufferedImage land1
+        -BufferedImage land2
+        -GameScreen gameScreen
+        +Land(GameScreen gameScreen)
+        +updatePosition()
+        +draw(Graphics g)
+    }
+
+    class Clouds {
+        -List<BufferedImage> clouds
+        -List<Integer> cloudsX
+        -List<Integer> cloudsY
+        -GameScreen gameScreen
+        +Clouds(GameScreen gameScreen)
+        +updatePosition()
+        +draw(Graphics g)
+    }
+
+    class Score {
+        -GameScreen gameScreen
+        -int score
+        -int highScore
+        +Score(GameScreen gameScreen)
+        +scoreUp()
+        +writeScore()
+        +draw(Graphics g)
+    }
+}
+
+package "manager" {
+    class EnemyManager {
+        -Cactuses cactuses
+        -Birds birds
+        -double distanceBetweenEnemies
+        -double cactusesPercentage
+        -double birdsPercentage
+        +EnemyManager(GameScreen gameScreen)
+        +updatePosition()
+        +isCollision(Rectangle hitBox)
+        +draw(Graphics g)
+    }
+
+    class ControlsManager {
+        -Controls controls
+        -GameScreen gameScreen
+        +ControlsManager(Controls controls, GameScreen gameScreen)
+        +update()
+    }
+
+    class SoundManager {
+        -Clip clip
+        +static int WAITING_TIME
+        +SoundManager(String path)
+        +startThread()
+        +play()
+    }
+}
+
+package "misc" {
+    enum GameState {
+        GAME_STATE_START
+        GAME_STATE_IN_PROGRESS
+        GAME_STATE_OVER
+        GAME_STATE_PAUSED
+        GAME_STATE_INTRO
+    }
+
+    enum DinoState {
+        DINO_RUN
+        DINO_DOWN_RUN
+        DINO_JUMP
+        DINO_DEAD
+    }
+
+    enum EnemyType {
+        CACTUS
+        BIRD
+    }
+
+    class Animation {
+        -List<BufferedImage> sprites
+        -int currentSpriteIndex
+        -int updateTime
+        -long lastUpdateTime
+        +Animation(int updateTime)
+        +updateSprite()
+        +addSprite(BufferedImage sprite)
+        +getSprite()
+    }
+
+    class Controls {
+        -boolean isPressedUp
+        -boolean isPressedDown
+        -GameScreen gameScreen
+        +Controls(GameScreen gameScreen)
+        +isPressedUp()
+        +isPressedDown()
+    }
+}
+
+package "util" {
+    class Resource {
+        +static BufferedImage getImage(String path)
+        +static Clip getSound(String path)
+        +static boolean isJar()
+    }
+}
+
+' Relationships
+GameWindow "1" *-- "1" GameScreen
+GameScreen "1" *-- "1" Dino
+GameScreen "1" *-- "1" Land
+GameScreen "1" *-- "1" Clouds
+GameScreen "1" *-- "1" Score
+GameScreen "1" *-- "1" EnemyManager
+GameScreen "1" *-- "1" Controls
+GameScreen "1" *-- "1" SoundManager
+
+EnemyManager "1" *-- "1" Cactuses
+EnemyManager "1" *-- "1" Birds
+
+Dino "1" *-- "1" Animation
+Dino "1" *-- "1" Controls
+
+GameScreen ..> GameState
+Dino ..> DinoState
+EnemyManager ..> EnemyType
+
+ControlsManager "1" *-- "1" Controls
+ControlsManager "1" *-- "1" GameScreen
+
+' Notes
+note right of GameWindow
+  Main window class that
+  initializes the game
+end note
+
+note right of GameScreen
+  Core game logic and
+  rendering engine
+end note
+
+note right of Dino
+  Player character with
+  movement and collision
+  detection
+end note
+
+note right of EnemyManager
+  Manages spawning and
+  updating of enemies
+end note
+
+@enduml 
